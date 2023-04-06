@@ -41,8 +41,13 @@ private:
                 {
                     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
                 }
+                else if (cell_kind == 2)
+                {
+                    SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+                }
                 else
                 {
+                    // non specified species
                     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
                 }
             }
@@ -89,7 +94,7 @@ public:
         // Clear screen
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
-        vector<tuple<int, int, bool, int>> cells_status = start("data/board.brd", ROWS, COLUMNS); // load initale game stat
+        vector<tuple<int, int, bool, int>> cells_status = start("../data/board.brd", ROWS, COLUMNS); // load initale game stat
 
         // Wait for user to quit
         bool quit = false;

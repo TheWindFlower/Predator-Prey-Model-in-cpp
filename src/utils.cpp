@@ -4,10 +4,29 @@
 #include <fstream>
 #include <iostream>
 #include <ctime>
+#include <unordered_map>
 #include "../include/utils.hpp"
 
 using std::tuple;
 using std::vector;
+
+int mostFrequent(vector<int> &vec)
+{
+    std::unordered_map<int, int> freq;
+    int max_freq = 0, res = vec[0];
+
+    for (int num : vec)
+    {
+        freq[num]++;
+        if (freq[num] > max_freq)
+        {
+            max_freq = freq[num];
+            res = num;
+        }
+    }
+
+    return res;
+}
 
 std::vector<std::tuple<int, int, bool, int>> next_generation(const vector<tuple<int, int, bool, int>> &current_status, int rows, int columns)
 {
@@ -18,11 +37,22 @@ std::vector<std::tuple<int, int, bool, int>> next_generation(const vector<tuple<
         for (int j = 0; j < columns; j++)
         {
             int alive_neighbors = 0;
+            int friendly_neighbors = 0;
+            int enemy_neighbors = 0;
+            int cells_type = 0;                                                      // default = dead
+            bool current_cell_status = std::get<2>(current_status[i * columns + j]); // dead or alive
+            if (std::get<2>(current_status[i * columns + j]) == true)                // if the cell is alive then get the species
+            {
+                cells_type = std::get<3>(current_status[i * columns + j]); // set spices to 0 if dead
+            }
+
             // Check neighbors
+            vector<int> enemy_neighbors_vect; // vector of enemy species
             for (int x = -1; x <= 1; x++)
             {
                 for (int y = -1; y <= 1; y++)
                 {
+
                     int neighbor_row = i + x;
                     int neighbor_column = j + y;
                     // Check if neighbor is within bounds
@@ -37,69 +67,47 @@ std::vector<std::tuple<int, int, bool, int>> next_generation(const vector<tuple<
                         if (std::get<2>(current_status[neighbor_row * columns + neighbor_column]))
                         {
                             alive_neighbors++;
+                            if (std::get<3>(current_status[neighbor_row * columns + neighbor_column]) == cells_type) // if the cells is dead(species=0) then their is no friendly
+                            {
+                                friendly_neighbors++;
+                            }
+                            else
+                            {
+                                enemy_neighbors_vect.push_back(std::get<3>(current_status[neighbor_row * columns + neighbor_column]));
+                                enemy_neighbors++;
+                            }
                         }
                     }
                 }
             }
 
             // Apply Game of Life rules
-            bool current_cell_status = std::get<2>(current_status[i * columns + j]);
-            bool super_cells = std::get<3>(current_status[i, j]);
             if (current_cell_status && alive_neighbors < 2)
             {
-                // Underpopulation
-                if (super_cells)
-                {
-                    next_status.emplace_back(i, j, true, false); // loose super state (loose 1hp)
-                }
-                else
-                {
-                    next_status.emplace_back(i, j, false, false); // die
-                }
+                // underpopulation
+                next_status.emplace_back(i, j, false, cells_type); // die
             }
             else if (current_cell_status && (alive_neighbors == 2 || alive_neighbors == 3))
-            { // Survival
-                if (super_cells)
-                {
-                    next_status.emplace_back(i, j, true, true); // stay alive
-                }
-                else
-                {
-                    next_status.emplace_back(i, j, true, false); // stay alive
-                }
+            {
+                // Survival
+                next_status.emplace_back(i, j, true, cells_type); // stay alive
             }
             else if (current_cell_status && alive_neighbors > 3)
-            { // Overpopulation
-                if (super_cells)
-                {
-                    next_status.emplace_back(i, j, true, false); // loose super stat(loose 1 hp)
-                }
-                else
-                {
-                    next_status.emplace_back(i, j, false, false); // die
-                }
+            {
+                // Overpopulation
+                next_status.emplace_back(i, j, false, cells_type); // die
             }
             else if (!current_cell_status && alive_neighbors == 3)
-            { // Reproduction
-                // not super stat logic, red cells don't reproduce
-                next_status.emplace_back(i, j, true, false);
+            {
+                // Reproduction
+                // need to check witch neighbors is the more present
+                int most_common_species = mostFrequent(enemy_neighbors_vect);
+                next_status.emplace_back(i, j, true, most_common_species);
             }
             else
-            { // Stasis
-                if (super_cells && current_cell_status)
-                {
-                    next_status.emplace_back(i, j, true, true);
-                }
-                else
-                {
-                    next_status.emplace_back(i, j, current_cell_status, false);
-                }
-            }
-            // check if cells is dead and has super stat (shoudl'nt happend)
-            if (!current_cell_status && super_cells)
             {
-                next_status.emplace_back(i, j, false, false);
-                std::cout << "corrupt cells" << std::endl;
+                // Stasis
+                next_status.emplace_back(i, j, current_cell_status, cells_type);
             }
         }
     }
@@ -110,7 +118,7 @@ vector<tuple<int, int, bool, int>> start(std::string filename, int rows, int col
 {
     vector<tuple<int, int, bool, int>> coordinates;
 
-    // Initialize all coordinates to false (0) and not special
+    // Initialize all coordinates to false (dead cells so no species)
     for (int i = 0; i < rows; i++)
     {
         for (int j = 0; j < columns; j++)
@@ -144,19 +152,19 @@ void grid_gen(int x, int y)
         {
             if ((double)std::rand() / RAND_MAX < 0.5)
             {
-                if ((double)std::rand() / RAND_MAX < 0.5)
+                if (i >= int(x / 2))
                 {
-                    end.push_back(std::to_string(i) + " " + std::to_string(j) + " " + std::to_string(1));
+                    end.push_back(std::to_string(i) + " " + std::to_string(j) + " " + std::to_string(1)); // blue
                 }
                 else
                 {
-                    end.push_back(std::to_string(i) + " " + std::to_string(j) + " " + std::to_string(0));
+                    end.push_back(std::to_string(i) + " " + std::to_string(j) + " " + std::to_string(2)); // red
                 }
             }
         }
     }
 
-    std::ofstream file("data/board.brd");
+    std::ofstream file("../data/board.brd");
     file.clear(); // clear the file
     for (const std::string &cell : end)
     {
