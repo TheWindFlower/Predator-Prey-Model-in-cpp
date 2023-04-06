@@ -1,0 +1,32 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/rflower/Documents/dev/Predator-Prey/include/utils.hpp
+vector
+-
+tuple
+-
+string
+-
+
+/home/rflower/Documents/dev/Predator-Prey/src/utils.cpp
+vector
+-
+tuple
+-
+string
+-
+fstream
+-
+iostream
+-
+ctime
+-
+../include/utils.hpp
+/home/rflower/Documents/dev/Predator-Prey/include/utils.hpp
+
