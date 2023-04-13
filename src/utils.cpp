@@ -24,11 +24,10 @@ int mostFrequent(vector<int> &vec)
             res = num;
         }
     }
-
     return res;
 }
 
-std::vector<std::tuple<int, int, bool, int>> next_generation(const vector<tuple<int, int, bool, int>> &current_status, int rows, int columns)
+vector<tuple<int, int, bool, int>> next_generation(const vector<tuple<int, int, bool, int>> &current_status, int rows, int columns)
 {
 
     vector<tuple<int, int, bool, int>> next_status;
@@ -101,8 +100,7 @@ std::vector<std::tuple<int, int, bool, int>> next_generation(const vector<tuple<
             {
                 // Reproduction
                 // need to check witch neighbors is the more present
-                int most_common_species = mostFrequent(enemy_neighbors_vect);
-                next_status.emplace_back(i, j, true, most_common_species);
+                next_status.emplace_back(i, j, true, mostFrequent(enemy_neighbors_vect));
             }
             else
             {
@@ -152,13 +150,21 @@ void grid_gen(int x, int y)
         {
             if ((double)std::rand() / RAND_MAX < 0.5)
             {
-                if (i >= int(x / 2))
+                if (i >= int(x / 2) && j >= int(y / 2)) // top right
                 {
                     end.push_back(std::to_string(i) + " " + std::to_string(j) + " " + std::to_string(1)); // blue
                 }
-                else
+                else if (i <= int(x / 2) && j <= int(y / 2)) // top left
+                {
+                    end.push_back(std::to_string(i) + " " + std::to_string(j) + " " + std::to_string(3)); // green
+                }
+                else if (i >= int(x / 2) && j <= int(y / 2)) // bottom right
                 {
                     end.push_back(std::to_string(i) + " " + std::to_string(j) + " " + std::to_string(2)); // red
+                }
+                else // bottom left
+                {
+                    end.push_back(std::to_string(i) + " " + std::to_string(j) + " " + std::to_string(4)); // pink
                 }
             }
         }

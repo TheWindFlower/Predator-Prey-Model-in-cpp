@@ -6,7 +6,6 @@
 #include <tuple>
 #include <string>
 #include <sstream>
-#include <future>
 #include "include/utils.hpp"
 
 using std::tuple;
@@ -44,6 +43,14 @@ private:
                 else if (cell_kind == 2)
                 {
                     SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+                }
+                else if (cell_kind == 3)
+                {
+                    SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+                }
+                else if (cell_kind == 4)
+                {
+                    SDL_SetRenderDrawColor(renderer, 255, 0, 255, 255); // pink
                 }
                 else
                 {
@@ -151,6 +158,7 @@ public:
         return 0;
     }
 };
+
 int main(int argc, char *argv[])
 {
     int delay = 0;
