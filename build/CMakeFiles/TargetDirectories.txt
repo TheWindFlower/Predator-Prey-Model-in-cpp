@@ -1,3 +1,0 @@
-/home/rflower/Documents/dev/Predator-Prey/build/CMakeFiles/rebuild_cache.dir
-/home/rflower/Documents/dev/Predator-Prey/build/CMakeFiles/edit_cache.dir
-/home/rflower/Documents/dev/Predator-Prey/build/CMakeFiles/app.dir

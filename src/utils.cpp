@@ -42,7 +42,10 @@ vector<tuple<int, int, bool, int>> next_generation(const vector<tuple<int, int, 
             bool current_cell_status = std::get<2>(current_status[i * columns + j]); // dead or alive
             if (std::get<2>(current_status[i * columns + j]) == true)                // if the cell is alive then get the species
             {
-                cells_type = std::get<3>(current_status[i * columns + j]); // set spices to 0 if dead
+                cells_type = std::get<3>(current_status[i * columns + j]);
+            }
+            else{
+                cells_type = 0;
             }
 
             // Check neighbors
