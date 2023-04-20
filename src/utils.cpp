@@ -10,8 +10,27 @@
 using std::tuple;
 using std::vector;
 
+// game rule cap
+const int UNDER_POPULATION_CAP = 2;        // below that -> die DEFAULT = 2
+const int OVER_POPULATION_CAP = 3;         // over that -> die or reproduce DEFAULT = 3
+const int REPRODUCTION_POPULATION_CAP = 3; // eproduce cap  DEFAULT = 3
+/*
+notable exemple(U=UNDER_POPULATION_CAP, O=OVER_POPULATION_CAP, R=REPRODUCTION_POPULATION_CAP):
+U=1
+O=4
+R=3
+lineare pattern
+
+U=4
+O=9
+R=5
+cave pattern
+*/
+
+// determine the integer the most frequent in a vector
 int mostFrequent(vector<int> &vec)
 {
+    // some chatGPT black magic
     std::unordered_map<int, int> freq;
     int max_freq = 0, res = vec[0];
 
@@ -27,10 +46,11 @@ int mostFrequent(vector<int> &vec)
     return res;
 }
 
+// return the next board of the game given the current one
 vector<tuple<int, int, bool, int>> next_generation(const vector<tuple<int, int, bool, int>> &current_status, int rows, int columns)
 {
-
     vector<tuple<int, int, bool, int>> next_status;
+    // for each cell count the friendly || enemy neighbors
     for (int i = 0; i < rows; i++)
     {
         for (int j = 0; j < columns; j++)
@@ -42,13 +62,14 @@ vector<tuple<int, int, bool, int>> next_generation(const vector<tuple<int, int, 
             bool current_cell_status = std::get<2>(current_status[i * columns + j]); // dead or alive
             if (std::get<2>(current_status[i * columns + j]) == true)                // if the cell is alive then get the species
             {
-                cells_type = std::get<3>(current_status[i * columns + j]);
+                cells_type = std::get<3>(current_status[i * columns + j]); // get the species
             }
-            else{
-                cells_type = 0;
+            else
+            {
+                cells_type = 0; // dead cell
             }
 
-            // Check neighbors
+            // Check neighbors (for each cell check the neighbors cells)
             vector<int> enemy_neighbors_vect; // vector of enemy species
             for (int x = -1; x <= 1; x++)
             {
@@ -84,22 +105,22 @@ vector<tuple<int, int, bool, int>> next_generation(const vector<tuple<int, int, 
             }
 
             // Apply Game of Life rules
-            if (current_cell_status && alive_neighbors < 2)
+            if (current_cell_status && alive_neighbors < UNDER_POPULATION_CAP)
             {
                 // underpopulation
                 next_status.emplace_back(i, j, false, cells_type); // die
             }
-            else if (current_cell_status && (alive_neighbors == 2 || alive_neighbors == 3))
+            else if (current_cell_status && (alive_neighbors == UNDER_POPULATION_CAP || alive_neighbors == OVER_POPULATION_CAP))
             {
                 // Survival
                 next_status.emplace_back(i, j, true, cells_type); // stay alive
             }
-            else if (current_cell_status && alive_neighbors > 3)
+            else if (current_cell_status && alive_neighbors > OVER_POPULATION_CAP)
             {
                 // Overpopulation
                 next_status.emplace_back(i, j, false, cells_type); // die
             }
-            else if (!current_cell_status && alive_neighbors == 3)
+            else if (!current_cell_status && alive_neighbors == REPRODUCTION_POPULATION_CAP)
             {
                 // Reproduction
                 // need to check witch neighbors is the more present
